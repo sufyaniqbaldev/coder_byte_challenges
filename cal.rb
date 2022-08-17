@@ -1,23 +1,39 @@
 def calculator(str)
-  result, stack, sign = 0, [], 1
-  str = str.gsub(/\s+/, '')
-  str.length.times do |i|
-    current = str[i]
-    if (current === '+')
-      sign = 1
-    elsif (current === '-')
-      sign = -1
-    elsif(current.to_i >= 0 && current.to_i <= 9)
-       num = current.to_i
-      while(i + 1 < str.length && str[i + 1] >= '0' && str[i + 1] <='9')
-        num += str[i + 1].to_i
-        i +=1
+  number, stack, oprator = 0, [], "+"
+  str = str.gsub(/\s+/, '') + "+"
+  str.split('').each_with_index do |ch, i|
+      if ch.scan(/\d/)&.first&.to_i&.positive?
+        number = number * 10 + ch.to_i
       end
-       result += sign * num
-    end
+      if ch == "("
+        stack.push(oprator)
+        stack.push('(')
+        oprator = '+'
+      end
+      if "+-*/)".include? ch  ||  i == str.length - 1
+        if oprator == "*"
+            stack.push(stack.pop.to_i * number.to_i)
+        elsif oprator == '/'
+            stack.push(stack.pop.to_i / number.to_i)
+        elsif oprator == "+"
+            stack.push(number)
+        elsif oprator == "-"
+            stack.push(-number)
+        end
+        if ch == ')'
+            number, item = 0, stack.pop
+            while item != '('
+                number += item
+                item = stack.pop
+            end
+            oprator = stack.pop
+        else
+            number = 0
+            oprator = ch
+        end
+      end
   end
-  return result
+  return stack.sum()
 end
 
-
-puts calculator("4+4+ 6-1 ")
+puts calculator("6*(4/2)+3*1")
